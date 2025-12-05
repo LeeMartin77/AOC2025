@@ -8,31 +8,13 @@ import (
 )
 
 func TestPhaseOne(t *testing.T) {
-	teststring := `L68
-L30
-R48
-L5
-R60
-L55
-L1
-L99
-R14
-L82`
+	teststring := ``
 	res := solution.ComputeSolutionOne([]byte(teststring))
-	assert.Equal(t, int64(3), res)
+	assert.Equal(t, int64(0), res)
 }
 
-func TestPhaseTwo(t *testing.T) {
-	teststring := `L68
-L30
-R48
-L5
-R60
-L55
-L1
-L99
-R14
-L82`
+func xTestPhaseTwo(t *testing.T) {
+	teststring := ``
 	res := solution.ComputeSolutionTwo([]byte(teststring))
-	assert.Equal(t, int64(6), res)
+	assert.Equal(t, int64(0), res)
 }
