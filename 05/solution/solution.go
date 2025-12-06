@@ -18,6 +18,37 @@ func (u *unspoiltranges) IsUnspoilt(p int64) bool {
 	return false
 }
 
+func (u *unspoiltranges) TotalUnspoiltIds() int64 {
+	// consolidate ranges
+	consolidated_ranges := [][]int64{}
+outer:
+	for _, r := range u.ranges {
+		for i, cr := range consolidated_ranges {
+			consolidated := false
+			if r[1] <= cr[1] && r[1] >= cr[0] && r[0] < cr[0] {
+				// extend start of range
+				consolidated_ranges[i][0] = r[0]
+				consolidated = true
+			}
+
+			if r[0] >= cr[0] && r[0] <= cr[1] && r[1] > cr[1] {
+				// extend end of range
+				consolidated_ranges[i][1] = r[1]
+				consolidated = true
+			}
+			if consolidated {
+				continue outer
+			}
+		}
+		consolidated_ranges = append(consolidated_ranges, r)
+	}
+	total := int64(0)
+	for _, cr := range consolidated_ranges {
+		total += (cr[1] - cr[0])
+	}
+	return total
+}
+
 func ComputeSolutionOne(data []byte) int64 {
 	ingredients := false
 	unspoilt := unspoiltranges{}
@@ -43,5 +74,16 @@ func ComputeSolutionOne(data []byte) int64 {
 }
 
 func ComputeSolutionTwo(data []byte) int64 {
-	panic("unimplemented")
+	unspoilt := unspoiltranges{}
+	for _, ln := range strings.Split(string(data), "\n") {
+		if ln == "" {
+			break
+		}
+		str, end := strings.Split(ln, "-")[0], strings.Split(ln, "-")[1]
+		strint, _ := strconv.ParseInt(str, 10, 64)
+		eint, _ := strconv.ParseInt(end, 10, 64)
+		unspoilt.ranges = append(unspoilt.ranges, []int64{strint, eint})
+
+	}
+	return unspoilt.TotalUnspoiltIds()
 }
