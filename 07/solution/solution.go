@@ -3,6 +3,7 @@ package solution
 import (
 	"fmt"
 	"strings"
+	"sync"
 )
 
 func beamAtCord(beams [][]int, x, y int) bool {
@@ -42,8 +43,7 @@ func renderMap(splitters [][]rune, beams [][]int) {
 	}
 }
 
-func ComputeSolutionOne(data []byte) int64 {
-	mapstr := string(data)
+func setup(mapstr string) ([][]rune, [][]int, int) {
 	splitters := [][]rune{}
 	lines := strings.Split(mapstr, "\n")
 	beams := [][]int{}
@@ -61,6 +61,12 @@ func ComputeSolutionOne(data []byte) int64 {
 		}
 		maxy = y
 	}
+	return splitters, beams, maxy
+}
+
+func ComputeSolutionOne(data []byte) int64 {
+	mapstr := string(data)
+	splitters, beams, maxy := setup(mapstr)
 
 	splits := 0
 
@@ -93,6 +99,44 @@ func ComputeSolutionOne(data []byte) int64 {
 	return int64(splits)
 }
 
+func progressBeam(wg *sync.WaitGroup, splitters [][]rune, b []int, timecount chan int) {
+	if b[1] >= len(splitters[0]) {
+		wg.Done()
+		return
+	}
+
+	if splitters[b[0]][b[1]] == '^' {
+		timecount <- 1
+		wg.Add(2)
+		wg.Done()
+		go progressBeam(wg, splitters, []int{b[0] - 1, b[1] - 1}, timecount)
+		go progressBeam(wg, splitters, []int{b[0] + 1, b[1] - 1}, timecount)
+	} else {
+		go progressBeam(wg, splitters, []int{b[0], b[1] + 1}, timecount)
+	}
+}
+
 func ComputeSolutionTwo(data []byte) int64 {
-	panic("unimplemented")
+	mapstr := string(data)
+	splitters, beams, _ := setup(mapstr)
+
+	start := beams[0]
+	timelines := 0
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	timecount := make(chan int)
+
+	go func() {
+		for cnt := range timecount {
+			timelines += cnt
+		}
+	}()
+
+	go progressBeam(&wg, splitters, start, timecount)
+
+	wg.Wait()
+	close(timecount)
+
+	return int64(timelines + 1)
 }
