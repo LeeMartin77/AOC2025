@@ -22,8 +22,20 @@ iii: out`
 	assert.Equal(t, int64(5), res)
 }
 
-func xTestPhaseTwo(t *testing.T) {
-	teststring := ``
+func TestPhaseTwo(t *testing.T) {
+	teststring := `svr: aaa bbb
+aaa: fft
+fft: ccc
+bbb: tty
+tty: ccc
+ccc: ddd eee
+ddd: hub
+hub: fff
+eee: dac
+dac: fff
+fff: ggg hhh
+ggg: out
+hhh: out`
 	res := solution.ComputeSolutionTwo([]byte(teststring))
-	assert.Equal(t, int64(0), res)
+	assert.Equal(t, int64(2), res)
 }
